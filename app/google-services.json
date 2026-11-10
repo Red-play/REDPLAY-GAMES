@@ -12,6 +12,20 @@
           "package_name": "com.redplay.games"
         }
       },
+      "oauth_client": [
+        {
+          "client_id": "366593620253-0be3daqhko5d8d9h36jnn7fh9q288igj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.redplay.games",
+            "certificate_hash": "39538140e079ee3a2735fc3d600ad9ff7f47c3e8"
+          }
+        },
+        {
+          "client_id": "366593620253-5dbiri86omaadauuasfa859kc0oou5va.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDUBqq8UEGgg-I5hGnZUrFBHjLiqQcrjRM"
@@ -19,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "366593620253-5dbiri86omaadauuasfa859kc0oou5va.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
