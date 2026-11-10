@@ -1,9 +1,13 @@
 
 package com.redplay.games
 
+import android.app.Activity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -20,8 +24,13 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 
 private val Ink = Color(0xFF08090D)
 private val Surface1 = Color(0xFF12141B)
@@ -105,9 +114,7 @@ fun RedplayApp() {
             )
         ) {
             Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(Ink)
+                Modifier.fillMaxSize().background(Ink)
             ) {
                 Column(Modifier.fillMaxSize()) {
                     TopBar()
@@ -194,19 +201,16 @@ fun RedplayApp() {
 @Composable
 private fun TopBar() {
     Row(
-        Modifier
-            .fillMaxWidth()
+        Modifier.fillMaxWidth()
             .background(Color(0xFF0D0F15))
             .padding(horizontal = 18.dp, vertical = 13.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            Modifier
-                .size(44.dp)
-                .background(
-                    Brush.linearGradient(listOf(Crimson, Pink)),
-                    RoundedCornerShape(14.dp)
-                ),
+            Modifier.size(44.dp).background(
+                Brush.linearGradient(listOf(Crimson, Pink)),
+                RoundedCornerShape(14.dp)
+            ),
             contentAlignment = Alignment.Center
         ) {
             Text("R", fontSize = 29.sp, fontWeight = FontWeight.Black, color = Ink)
@@ -216,20 +220,11 @@ private fun TopBar() {
 
         Column {
             Text("REDPLAY", fontSize = 21.sp, fontWeight = FontWeight.Black)
-            Text(
-                "GAMES • PLAY MORE. PLAY RED.",
-                fontSize = 8.sp,
-                color = Crimson
-            )
+            Text("GAMES • PLAY MORE. PLAY RED.", fontSize = 8.sp, color = Crimson)
         }
 
         Spacer(Modifier.weight(1f))
-        Icon(
-            Icons.Default.NotificationsNone,
-            null,
-            tint = White,
-            modifier = Modifier.size(25.dp)
-        )
+        Icon(Icons.Default.NotificationsNone, null, tint = White, modifier = Modifier.size(25.dp))
     }
 }
 
@@ -242,20 +237,15 @@ private fun HomeScreen(
     onQuery: (String) -> Unit,
     all: () -> Unit
 ) {
-    LazyColumn(
-        contentPadding = PaddingValues(bottom = 100.dp)
-    ) {
+    LazyColumn(contentPadding = PaddingValues(bottom = 100.dp)) {
         item { Hero(all) }
         item { SearchField(query, onQuery) }
         item { SectionHeader("التصنيفات", "استكشف حسب النوع") }
 
-        // تم إصلاح الخطأ هنا: CategoryRail تستقبل String
         item {
             CategoryRail(
                 listOf("كرة القدم", "أكشن", "سباق", "مغامرات", "أركيد")
-            ) {
-                all()
-            }
+            ) { all() }
         }
 
         item { SectionHeader("الأكثر شهرة", "ألعاب يختارها اللاعبون") }
@@ -265,12 +255,12 @@ private fun HomeScreen(
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(catalog.take(6)) {
+                items(catalog.take(6)) { game ->
                     GamePoster(
-                        it,
-                        favs.contains(it.title),
-                        { open(it) },
-                        { toggle(it.title) }
+                        game,
+                        favs.contains(game.title),
+                        { open(game) },
+                        { toggle(game.title) }
                     )
                 }
             }
@@ -280,10 +270,10 @@ private fun HomeScreen(
 
         item {
             Column(Modifier.padding(horizontal = 15.dp)) {
-                catalog.filter { it.offline }.take(5).forEach {
+                catalog.filter { it.offline }.take(5).forEach { game ->
                     GameRow(
-                        it, favs.contains(it.title),
-                        { open(it) }, { toggle(it.title) }
+                        game, favs.contains(game.title),
+                        { open(game) }, { toggle(game.title) }
                     )
                 }
             }
@@ -301,9 +291,7 @@ private fun Hero(onExplore: () -> Unit) {
     )
 
     Box(
-        Modifier
-            .fillMaxWidth()
-            .padding(15.dp)
+        Modifier.fillMaxWidth().padding(15.dp)
             .clip(RoundedCornerShape(26.dp))
             .background(
                 Brush.linearGradient(
@@ -316,18 +304,9 @@ private fun Hero(onExplore: () -> Unit) {
             Text("عالم الألعاب بين إيديك", color = Pink, fontSize = 11.sp)
             Spacer(Modifier.height(14.dp))
             Text("العبها بطريقتك.", fontSize = 29.sp, fontWeight = FontWeight.Black)
-            Text(
-                "اكتشف. حمّل. استمتع.",
-                fontSize = 23.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Pink
-            )
+            Text("اكتشف. حمّل. استمتع.", fontSize = 23.sp, fontWeight = FontWeight.ExtraBold, color = Pink)
             Spacer(Modifier.height(8.dp))
-            Text(
-                "وجهتك لاكتشاف ألعابك المفضلة في مكان واحد.",
-                fontSize = 12.sp,
-                color = Color(0xFFD1C7CD)
-            )
+            Text("وجهتك لاكتشاف ألعابك المفضلة في مكان واحد.", fontSize = 12.sp, color = Color(0xFFD1C7CD))
             Spacer(Modifier.height(18.dp))
             Button(
                 onClick = onExplore,
@@ -347,15 +326,9 @@ private fun SearchField(value: String, onChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = onChange,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 5.dp),
-        placeholder = {
-            Text("ابحث عن لعبتك المفضلة...", color = Soft, fontSize = 12.sp)
-        },
-        leadingIcon = {
-            Icon(Icons.Default.Search, null, tint = Crimson)
-        },
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 5.dp),
+        placeholder = { Text("ابحث عن لعبتك المفضلة...", color = Soft, fontSize = 12.sp) },
+        leadingIcon = { Icon(Icons.Default.Search, null, tint = Crimson) },
         singleLine = true,
         shape = RoundedCornerShape(15.dp),
         colors = OutlinedTextFieldDefaults.colors(
@@ -373,21 +346,14 @@ private fun SearchField(value: String, onChange: (String) -> Unit) {
 @Composable
 private fun SectionHeader(title: String, sub: String) {
     Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(start = 18.dp, end = 18.dp, top = 15.dp, bottom = 9.dp),
+        Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 15.dp, bottom = 9.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(Modifier.weight(1f)) {
             Text(title, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
             Text(sub, fontSize = 10.sp, color = Soft)
         }
-        Box(
-            Modifier
-                .width(4.dp)
-                .height(28.dp)
-                .background(Crimson, RoundedCornerShape(4.dp))
-        )
+        Box(Modifier.width(4.dp).height(28.dp).background(Crimson, RoundedCornerShape(4.dp)))
     }
 }
 
@@ -399,8 +365,7 @@ private fun CategoryRail(items: List<String>, onPick: (String) -> Unit) {
     ) {
         items(items) { c ->
             Box(
-                Modifier
-                    .background(Surface2, RoundedCornerShape(13.dp))
+                Modifier.background(Surface2, RoundedCornerShape(13.dp))
                     .border(1.dp, Color(0xFF303440), RoundedCornerShape(13.dp))
                     .clickable { onPick(c) }
                     .padding(horizontal = 17.dp, vertical = 13.dp)
@@ -412,109 +377,57 @@ private fun CategoryRail(items: List<String>, onPick: (String) -> Unit) {
 }
 
 @Composable
-private fun GamePoster(
-    g: Game,
-    fav: Boolean,
-    open: () -> Unit,
-    toggle: () -> Unit
-) {
+private fun GamePoster(g: Game, fav: Boolean, open: () -> Unit, toggle: () -> Unit) {
     Column(
-        Modifier
-            .width(145.dp)
-            .clip(RoundedCornerShape(18.dp))
-            .background(Surface1)
-            .clickable { open() }
+        Modifier.width(145.dp).clip(RoundedCornerShape(18.dp))
+            .background(Surface1).clickable { open() }
     ) {
         Box(
-            Modifier
-                .fillMaxWidth()
-                .height(115.dp)
-                .background(
-                    Brush.linearGradient(
-                        listOf(Color(0xFF4A1023), Color(0xFF171923))
-                    )
-                ),
+            Modifier.fillMaxWidth().height(115.dp).background(
+                Brush.linearGradient(listOf(Color(0xFF4A1023), Color(0xFF171923)))
+            ),
             contentAlignment = Alignment.Center
         ) {
             Text(g.emoji, fontSize = 51.sp)
             Text(
                 g.tag,
-                Modifier
-                    .align(Alignment.TopStart)
-                    .padding(8.dp)
-                    .background(Crimson, RoundedCornerShape(6.dp))
-                    .padding(6.dp),
+                Modifier.align(Alignment.TopStart).padding(8.dp)
+                    .background(Crimson, RoundedCornerShape(6.dp)).padding(6.dp),
                 fontSize = 8.sp
             )
-            IconButton(
-                onClick = toggle,
-                modifier = Modifier.align(Alignment.TopEnd)
-            ) {
+            IconButton(onClick = toggle, modifier = Modifier.align(Alignment.TopEnd)) {
                 Icon(
                     if (fav) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    null,
-                    tint = if (fav) Crimson else White
+                    null, tint = if (fav) Crimson else White
                 )
             }
         }
         Column(Modifier.padding(10.dp)) {
-            Text(
-                g.title,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Text(g.title, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(g.category, fontSize = 10.sp, color = Soft)
         }
     }
 }
 
 @Composable
-private fun GameRow(
-    g: Game,
-    fav: Boolean,
-    open: () -> Unit,
-    toggle: () -> Unit
-) {
+private fun GameRow(g: Game, fav: Boolean, open: () -> Unit, toggle: () -> Unit) {
     Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(vertical = 5.dp)
-            .clip(RoundedCornerShape(15.dp))
-            .background(Surface1)
-            .clickable { open() }
-            .padding(11.dp),
+        Modifier.fillMaxWidth().padding(vertical = 5.dp)
+            .clip(RoundedCornerShape(15.dp)).background(Surface1)
+            .clickable { open() }.padding(11.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            Modifier
-                .size(52.dp)
-                .background(Surface2, RoundedCornerShape(13.dp)),
-            contentAlignment = Alignment.Center
-        ) {
+        Box(Modifier.size(52.dp).background(Surface2, RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) {
             Text(g.emoji, fontSize = 27.sp)
         }
-
         Spacer(Modifier.width(11.dp))
-
         Column(Modifier.weight(1f)) {
             Text(g.title, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-            Text(
-                "${g.category} • ${if (g.offline) "بدون إنترنت" else "إنترنت"}",
-                fontSize = 10.sp,
-                color = Soft
-            )
+            Text("${g.category} • ${if (g.offline) "بدون إنترنت" else "إنترنت"}", fontSize = 10.sp, color = Soft)
         }
-
         IconButton(onClick = toggle) {
-            Icon(
-                if (fav) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                null,
-                tint = if (fav) Crimson else Soft
-            )
+            Icon(if (fav) Icons.Default.Favorite else Icons.Default.FavoriteBorder, null, tint = if (fav) Crimson else Soft)
         }
-
         Icon(Icons.Default.ChevronLeft, null, tint = Soft)
     }
 }
@@ -537,10 +450,7 @@ private fun ListingScreen(
         SearchField(query, onQuery)
 
         if (showFilter) {
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 14.dp),
-                horizontalArrangement = Arrangement.spacedBy(7.dp)
-            ) {
+            LazyRow(contentPadding = PaddingValues(horizontal = 14.dp), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
                 items(cats) { c ->
                     FilterChip(
                         selected = cat == c,
@@ -555,42 +465,24 @@ private fun ListingScreen(
             }
         }
 
-        LazyColumn(
-            contentPadding = PaddingValues(
-                start = 14.dp,
-                end = 14.dp,
-                bottom = 100.dp
-            )
-        ) {
-            items(list) {
-                GameRow(
-                    it,
-                    favs.contains(it.title),
-                    { open(it) },
-                    { toggle(it.title) }
-                )
+        LazyColumn(contentPadding = PaddingValues(start = 14.dp, end = 14.dp, bottom = 100.dp)) {
+            items(list) { game ->
+                GameRow(game, favs.contains(game.title), { open(game) }, { toggle(game.title) })
             }
         }
     }
 }
 
 @Composable
-private fun CategoriesScreen(
-    cats: List<String>,
-    pick: (String) -> Unit
-) {
+private fun CategoriesScreen(cats: List<String>, pick: (String) -> Unit) {
     Column(Modifier.fillMaxSize()) {
         SectionHeader("التصنيفات", "اختر عالمك المفضل")
-
         LazyColumn(contentPadding = PaddingValues(15.dp)) {
             items(cats) { c ->
                 Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 5.dp)
+                    Modifier.fillMaxWidth().padding(vertical = 5.dp)
                         .background(Surface1, RoundedCornerShape(15.dp))
-                        .clickable { pick(c) }
-                        .padding(17.dp),
+                        .clickable { pick(c) }.padding(17.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("🎮", fontSize = 24.sp)
@@ -604,46 +496,19 @@ private fun CategoriesScreen(
 }
 
 @Composable
-private fun DetailScreen(
-    g: Game,
-    fav: Boolean,
-    toggle: () -> Unit,
-    back: () -> Unit
-) {
+private fun DetailScreen(g: Game, fav: Boolean, toggle: () -> Unit, back: () -> Unit) {
     LazyColumn(contentPadding = PaddingValues(bottom = 100.dp)) {
         item {
             Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(235.dp)
-                    .background(
-                        Brush.linearGradient(
-                            listOf(Color(0xFF6B0B29), Color(0xFF171923), Ink)
-                        )
-                    )
+                Modifier.fillMaxWidth().height(235.dp).background(
+                    Brush.linearGradient(listOf(Color(0xFF6B0B29), Color(0xFF171923), Ink))
+                )
             ) {
-                Text(
-                    "رجوع",
-                    Modifier
-                        .align(Alignment.TopStart)
-                        .clickable { back() }
-                        .padding(18.dp),
-                    color = White
-                )
-
+                Text("رجوع", Modifier.align(Alignment.TopStart).clickable { back() }.padding(18.dp), color = White)
                 Text("🎮", Modifier.align(Alignment.Center), fontSize = 82.sp)
-
-                Text(
-                    "REDPLAY • GAME DETAILS",
-                    Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(20.dp),
-                    fontSize = 10.sp,
-                    color = Pink
-                )
+                Text("REDPLAY • GAME DETAILS", Modifier.align(Alignment.BottomStart).padding(20.dp), fontSize = 10.sp, color = Pink)
             }
         }
-
         item {
             Column(Modifier.padding(19.dp)) {
                 Text(g.title, fontSize = 25.sp, fontWeight = FontWeight.Black)
@@ -651,40 +516,26 @@ private fun DetailScreen(
                 Spacer(Modifier.height(13.dp))
                 Text(g.desc, color = Soft, fontSize = 13.sp)
                 Spacer(Modifier.height(20.dp))
-
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    InfoPill(
-                        if (g.offline) "قد تعمل دون إنترنت" else "تحتاج إنترنت",
-                        "الاتصال"
-                    )
+                    InfoPill(if (g.offline) "قد تعمل دون إنترنت" else "تحتاج إنترنت", "الاتصال")
                     InfoPill("Android", "المنصة")
                 }
-
                 Spacer(Modifier.height(20.dp))
-
                 Button(
                     onClick = toggle,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(13.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (fav) Surface2 else Crimson
-                    )
+                    colors = ButtonDefaults.buttonColors(containerColor = if (fav) Surface2 else Crimson)
                 ) {
-                    Icon(
-                        if (fav) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        null
-                    )
+                    Icon(if (fav) Icons.Default.Favorite else Icons.Default.FavoriteBorder, null)
                     Spacer(Modifier.width(8.dp))
                     Text(if (fav) "إزالة من المفضلة" else "أضف إلى المفضلة")
                 }
-
                 Spacer(Modifier.height(20.dp))
                 Text("التحميل الآمن", fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
                 Text(
                     "سيُضاف رابط المتجر الرسمي بعد التحقق من مصدره. لا تستخدم روابط مجهولة.",
-                    color = Soft,
-                    fontSize = 11.sp,
-                    modifier = Modifier.padding(top = 8.dp)
+                    color = Soft, fontSize = 11.sp, modifier = Modifier.padding(top = 8.dp)
                 )
             }
         }
@@ -693,34 +544,138 @@ private fun DetailScreen(
 
 @Composable
 private fun InfoPill(text: String, label: String) {
-    Column(
-        Modifier
-            .background(Surface1, RoundedCornerShape(12.dp))
-            .padding(12.dp)
-    ) {
+    Column(Modifier.background(Surface1, RoundedCornerShape(12.dp)).padding(12.dp)) {
         Text(label, fontSize = 9.sp, color = Soft)
         Text(text, fontSize = 11.sp, fontWeight = FontWeight.Bold)
     }
 }
 
+/* Google + Firebase Authentication */
 @Composable
 private fun ProfileScreen() {
+    val context = LocalContext.current
+    val activity = context as? Activity
+    val auth = remember { FirebaseAuth.getInstance() }
+
+    var user by remember { mutableStateOf(auth.currentUser) }
+    var loading by remember { mutableStateOf(false) }
+
+    val googleOptions = remember {
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(context.getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+    }
+
+    val googleClient = remember {
+        GoogleSignIn.getClient(context, googleOptions)
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(
+                    com.google.android.gms.common.api.ApiException::class.java
+                )
+                val token = account.idToken
+
+                if (token.isNullOrBlank()) {
+                    loading = false
+                    Toast.makeText(context, "لم يتم الحصول على رمز Google", Toast.LENGTH_LONG).show()
+                } else {
+                    val credential = GoogleAuthProvider.getCredential(token, null)
+                    auth.signInWithCredential(credential).addOnCompleteListener { signInTask ->
+                        loading = false
+                        if (signInTask.isSuccessful) {
+                            user = auth.currentUser
+                            Toast.makeText(context, "تم تسجيل الدخول بنجاح 🎉", Toast.LENGTH_LONG).show()
+                        } else {
+                            Toast.makeText(
+                                context,
+                                signInTask.exception?.localizedMessage ?: "فشل تسجيل الدخول",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                loading = false
+                Toast.makeText(context, e.localizedMessage ?: "تعذر تسجيل الدخول", Toast.LENGTH_LONG).show()
+            }
+        } else {
+            loading = false
+        }
+    }
+
     Column(Modifier.fillMaxSize().padding(18.dp)) {
         SectionHeader("ملف اللاعب", "مساحتك داخل REDPLAY")
 
         Box(
-            Modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.linearGradient(listOf(Color(0xFF4A1023), Surface1)),
-                    RoundedCornerShape(20.dp)
-                )
-                .padding(20.dp)
+            Modifier.fillMaxWidth().background(
+                Brush.linearGradient(listOf(Color(0xFF4A1023), Surface1)),
+                RoundedCornerShape(20.dp)
+            ).padding(20.dp)
         ) {
             Column {
                 Text("👾", fontSize = 40.sp)
-                Text("لاعب REDPLAY", fontWeight = FontWeight.ExtraBold, fontSize = 19.sp)
-                Text("وضع الزائر", color = Pink, fontSize = 11.sp)
+                Text(user?.displayName ?: "لاعب REDPLAY", fontWeight = FontWeight.ExtraBold, fontSize = 19.sp)
+                Text(
+                    if (user != null) "تم تسجيل الدخول باستخدام Google" else "وضع الزائر",
+                    color = Pink, fontSize = 11.sp
+                )
+                user?.email?.let {
+                    Spacer(Modifier.height(5.dp))
+                    Text(it, color = Soft, fontSize = 11.sp)
+                }
+            }
+        }
+
+        Spacer(Modifier.height(18.dp))
+
+        if (user == null) {
+            Button(
+                onClick = {
+                    if (activity != null) {
+                        loading = true
+                        launcher.launch(googleClient.signInIntent)
+                    } else {
+                        Toast.makeText(context, "تعذر فتح تسجيل الدخول", Toast.LENGTH_LONG).show()
+                    }
+                },
+                enabled = !loading,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(13.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Crimson)
+            ) {
+                if (loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("🌐  تسجيل الدخول باستخدام Google")
+                }
+            }
+        } else {
+            Button(
+                onClick = {
+                    auth.signOut()
+                    googleClient.signOut().addOnCompleteListener {
+                        user = auth.currentUser
+                        Toast.makeText(context, "تم تسجيل الخروج", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(13.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Surface2)
+            ) {
+                Icon(Icons.Default.Logout, null)
+                Spacer(Modifier.width(8.dp))
+                Text("تسجيل الخروج")
             }
         }
 
@@ -734,11 +689,8 @@ private fun ProfileScreen() {
             "عن REDPLAY GAMES"
         ).forEach {
             Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 5.dp)
-                    .background(Surface1, RoundedCornerShape(13.dp))
-                    .padding(16.dp)
+                Modifier.fillMaxWidth().padding(vertical = 5.dp)
+                    .background(Surface1, RoundedCornerShape(13.dp)).padding(16.dp)
             ) {
                 Text(it, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
             }
@@ -761,9 +713,7 @@ private fun BottomNav(
     )
 
     Row(
-        modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
+        modifier.fillMaxWidth().navigationBarsPadding()
             .background(Color(0xF20F1118))
             .border(0.5.dp, Color(0xFF292D38))
             .padding(top = 9.dp, bottom = 7.dp),
@@ -771,53 +721,36 @@ private fun BottomNav(
     ) {
         entries.forEach { (name, icon) ->
             val active = current == name
-
             val navScale by animateFloatAsState(
                 targetValue = if (active) 1.12f else 1f,
-                animationSpec = spring(
-                    dampingRatio = .55f,
-                    stiffness = 500f
-                ),
+                animationSpec = spring(dampingRatio = .55f, stiffness = 500f),
                 label = "navScale"
             )
 
             Column(
-                Modifier
-                    .weight(1f)
-                    .clickable { select(name) },
+                Modifier.weight(1f).clickable { select(name) },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = name,
                     tint = if (active) Crimson else Soft,
-                    modifier = Modifier
-                        .size(21.dp)
-                        .graphicsLayer {
-                            scaleX = navScale
-                            scaleY = navScale
-                        }
+                    modifier = Modifier.size(21.dp).graphicsLayer {
+                        scaleX = navScale
+                        scaleY = navScale
+                    }
                 )
-
                 Spacer(Modifier.height(3.dp))
-
                 Text(
                     name,
                     color = if (active) Crimson else Soft,
                     fontSize = 9.sp,
                     fontWeight = if (active) FontWeight.Bold else FontWeight.Normal
                 )
-
                 Spacer(Modifier.height(4.dp))
-
                 Box(
-                    Modifier
-                        .width(if (active) 18.dp else 4.dp)
-                        .height(2.dp)
-                        .background(
-                            if (active) Crimson else Color.Transparent,
-                            CircleShape
-                        )
+                    Modifier.width(if (active) 18.dp else 4.dp).height(2.dp)
+                        .background(if (active) Crimson else Color.Transparent, CircleShape)
                 )
             }
         }
