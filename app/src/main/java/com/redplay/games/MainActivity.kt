@@ -248,13 +248,18 @@ private fun HomeScreen(
         item { Hero(all) }
         item { SearchField(query, onQuery) }
         item { SectionHeader("التصنيفات", "استكشف حسب النوع") }
+
+        // تم إصلاح الخطأ هنا: CategoryRail تستقبل String
         item {
             CategoryRail(
-                listOf("كرة القدم", "أكشن", "سباق", "مغامرات", "أركيد"),
-                all
-            )
+                listOf("كرة القدم", "أكشن", "سباق", "مغامرات", "أركيد")
+            ) {
+                all()
+            }
         }
+
         item { SectionHeader("الأكثر شهرة", "ألعاب يختارها اللاعبون") }
+
         item {
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
@@ -270,7 +275,9 @@ private fun HomeScreen(
                 }
             }
         }
+
         item { SectionHeader("بدون إنترنت", "متعة في أي وقت") }
+
         item {
             Column(Modifier.padding(horizontal = 15.dp)) {
                 catalog.filter { it.offline }.take(5).forEach {
@@ -306,17 +313,9 @@ private fun Hero(onExplore: () -> Unit) {
             .border(1.dp, Crimson.copy(alpha = pulse), RoundedCornerShape(26.dp))
     ) {
         Column(Modifier.padding(22.dp)) {
-            Text(
-                "عالم الألعاب بين إيديك",
-                color = Pink,
-                fontSize = 11.sp
-            )
+            Text("عالم الألعاب بين إيديك", color = Pink, fontSize = 11.sp)
             Spacer(Modifier.height(14.dp))
-            Text(
-                "العبها بطريقتك.",
-                fontSize = 29.sp,
-                fontWeight = FontWeight.Black
-            )
+            Text("العبها بطريقتك.", fontSize = 29.sp, fontWeight = FontWeight.Black)
             Text(
                 "اكتشف. حمّل. استمتع.",
                 fontSize = 23.sp,
@@ -496,7 +495,9 @@ private fun GameRow(
         ) {
             Text(g.emoji, fontSize = 27.sp)
         }
+
         Spacer(Modifier.width(11.dp))
+
         Column(Modifier.weight(1f)) {
             Text(g.title, fontWeight = FontWeight.Bold, fontSize = 12.sp)
             Text(
@@ -505,6 +506,7 @@ private fun GameRow(
                 color = Soft
             )
         }
+
         IconButton(onClick = toggle) {
             Icon(
                 if (fav) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
@@ -512,6 +514,7 @@ private fun GameRow(
                 tint = if (fav) Crimson else Soft
             )
         }
+
         Icon(Icons.Default.ChevronLeft, null, tint = Soft)
     }
 }
@@ -578,6 +581,7 @@ private fun CategoriesScreen(
 ) {
     Column(Modifier.fillMaxSize()) {
         SectionHeader("التصنيفات", "اختر عالمك المفضل")
+
         LazyColumn(contentPadding = PaddingValues(15.dp)) {
             items(cats) { c ->
                 Row(
@@ -626,7 +630,9 @@ private fun DetailScreen(
                         .padding(18.dp),
                     color = White
                 )
+
                 Text("🎮", Modifier.align(Alignment.Center), fontSize = 82.sp)
+
                 Text(
                     "REDPLAY • GAME DETAILS",
                     Modifier
@@ -669,9 +675,7 @@ private fun DetailScreen(
                         null
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text(
-                        if (fav) "إزالة من المفضلة" else "أضف إلى المفضلة"
-                    )
+                    Text(if (fav) "إزالة من المفضلة" else "أضف إلى المفضلة")
                 }
 
                 Spacer(Modifier.height(20.dp))
