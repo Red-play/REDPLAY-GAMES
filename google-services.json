@@ -1,0 +1,28 @@
+{
+  "project_info": {
+    "project_number": "366593620253",
+    "project_id": "redplay-games",
+    "storage_bucket": "redplay-games.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:366593620253:android:24e9e124f1fcc427bec9f4",
+        "android_client_info": {
+          "package_name": "com.redplay.games"
+        }
+      },
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUBqq8UEGgg-I5hGnZUrFBHjLiqQcrjRM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
