@@ -32,6 +32,14 @@ jobs:
             gradle assembleDebug
           fi
 
+      - name: Get SHA-1 Fingerprint
+        run: |
+          keytool -list -v \
+            -keystore "$HOME/.android/debug.keystore" \
+            -storepass android \
+            -keypass android \
+            -alias androiddebugkey
+
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
