@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "366593620253-0be3daqhko5d8d9h36jnn7fh9q288igj.apps.googleusercontent.com",
+          "client_id": "366593620253-0eih1sppt4bml3n1ohj3u1ucaqt9rbhu.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.redplay.games",
-            "certificate_hash": "39538140e079ee3a2735fc3d600ad9ff7f47c3e8"
+            "certificate_hash": "a989041fda0e451e31a070bc0660d1ef38f909f9"
           }
         },
         {
