@@ -13,6 +13,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Get project
         uses: actions/checkout@v4
@@ -22,6 +23,12 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+
+      - name: Restore Debug Keystore
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: redplay-debug-keystore-v1
 
       - name: Create Debug Keystore
         run: |
